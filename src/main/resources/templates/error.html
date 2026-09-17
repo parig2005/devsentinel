@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Error')}"></head>
+<body>
+
+<header th:replace="~{layout :: navbar('')}"></header>
+
+<main class="container">
+    <section class="card error-card">
+        <h1>Something went wrong</h1>
+        <p>
+            The request could not be completed. No technical details are shown
+            here on purpose — check the application console for the full log.
+        </p>
+        <p class="mono muted" th:if="${status}">
+            Status: <span th:text="${status}">500</span>
+        </p>
+        <a th:href="@{/}" class="btn btn-primary">Back to upload</a>
+    </section>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

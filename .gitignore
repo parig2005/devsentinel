@@ -1,0 +1,78 @@
+# ===========================================================================
+# DevSentinel — .gitignore
+# ===========================================================================
+
+# --- Secrets: never commit these ------------------------------------------
+.env
+.env.local
+*.pem
+*.key
+secrets.properties
+
+# --- Java / Maven ----------------------------------------------------------
+target/
+build/
+*.class
+*.jar
+*.war
+*.ear
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+dependency-reduced-pom.xml
+
+# --- Database --------------------------------------------------------------
+# H2 stores the demo database here; it is regenerated on first run.
+data/
+*.mv.db
+*.trace.db
+*.db
+
+# --- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.Python
+*.egg-info/
+dist/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Hugging Face model cache ----------------------------------------------
+# Multi-hundred-MB weights. These download on first run; never commit them.
+.cache/
+models/
+*.safetensors
+*.bin
+*.onnx
+
+# --- IDEs ------------------------------------------------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+nbproject/
+
+# --- OS --------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs and temp ---------------------------------------------------------
+*.log
+logs/
+tmp/
+temp/
+uploads/
+*.zip
+*.tar.gz

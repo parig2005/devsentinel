@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!--
+  Shared fragments used by every page.
+  Thymeleaf resolves these via th:replace / th:insert.
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'DevSentinel — ' + ${pageTitle}">DevSentinel</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:fragment="navbar(active)" class="navbar">
+    <a class="brand" th:href="@{/}">
+        <span class="brand-mark">&#9679;</span>
+        <span class="brand-text">Dev<strong>Sentinel</strong></span>
+    </a>
+    <nav class="nav-links">
+        <a th:href="@{/}" th:classappend="${active} == 'home' ? 'active' : ''">Analyse</a>
+        <a th:href="@{/history}" th:classappend="${active} == 'history' ? 'active' : ''">History</a>
+        <a th:href="@{/api/v1/status}" target="_blank">API Status</a>
+    </nav>
+</header>
+
+<!-- AI engine status pill, shown on every page -->
+<div th:fragment="aistatus(status)" class="ai-status" th:classappend="${status.cssClass}">
+    <span class="dot"></span>
+    <span class="ai-label">AI Engine: <strong th:text="${status.label}">ONLINE</strong></span>
+    <span class="sep">|</span>
+    <span class="ai-label">Static Analysis: <strong>Available</strong></span>
+    <span class="ai-detail" th:text="${status.detail}"></span>
+</div>
+
+<footer th:fragment="footer" class="footer">
+    <p>
+        DevSentinel — static rule engine + CodeBERT semantic scoring.
+        CodeBERT is used as a base encoder for semantic representation, not as a
+        fine-tuned OWASP classifier.
+    </p>
+</footer>
+
+</body>
+</html>

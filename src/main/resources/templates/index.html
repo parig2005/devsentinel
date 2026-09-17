@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Analyse Java Source')}"></head>
+<body>
+
+<header th:replace="~{layout :: navbar('home')}"></header>
+
+<main class="container">
+
+    <section class="hero">
+        <h1>Java Vulnerability Analysis</h1>
+        <p class="subtitle">
+            Upload a <code>.java</code> file. DevSentinel parses it into an AST,
+            runs an explainable security rule engine, and layers CodeBERT
+            semantic scoring on top to produce a confidence-rated report.
+        </p>
+    </section>
+
+    <div th:replace="~{layout :: aistatus(${aiStatus})}"></div>
+
+    <!-- Validation / error message from a redirect -->
+    <div class="alert alert-error" th:if="${errorMessage}">
+        <strong>Upload failed.</strong>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <section class="card upload-card">
+        <h2>Upload source file</h2>
+        <form th:action="@{/analyze}" method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="file-drop" id="fileDrop">
+                <input type="file" name="file" id="fileInput" accept=".java" required>
+                <label for="fileInput" class="file-label">
+                    <span class="file-icon">&#8679;</span>
+                    <span class="file-text" id="fileText">Choose a .java file</span>
+                    <span class="file-hint">Maximum size 1 MB &middot; .java only</span>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary" id="analyzeBtn">Analyse Code</button>
+        </form>
+        <p class="note">
+            Uploaded code is parsed and read only. It is never compiled or executed.
+        </p>
+    </section>
+
+    <section class="card">
+        <h2>Detected vulnerability classes</h2>
+        <div class="catalog-grid">
+            <div class="catalog-item" th:each="entry : ${catalog}">
+                <div class="catalog-head">
+                    <span class="badge" th:classappend="'sev-' + ${#strings.toLowerCase(entry.value.severity)}"
+                          th:text="${entry.value.severity}">HIGH</span>
+                    <span class="catalog-name" th:text="${entry.value.displayName}">Name</span>
+                </div>
+                <div class="catalog-meta">
+                    <span class="chip" th:text="${entry.value.category}">SECURITY</span>
+                    <span class="owasp" th:if="${entry.value.owaspCategory}"
+                          th:text="${entry.value.owaspCategory}">OWASP</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<script>
+    // Reflect the chosen filename and prevent a confusing double submit.
+    var input = document.getElementById('fileInput');
+    var text = document.getElementById('fileText');
+    var form = document.getElementById('uploadForm');
+    var btn = document.getElementById('analyzeBtn');
+
+    input.addEventListener('change', function () {
+        text.textContent = input.files.length ? input.files[0].name : 'Choose a .java file';
+    });
+
+    form.addEventListener('submit', function () {
+        btn.disabled = true;
+        btn.textContent = 'Analysing...';
+    });
+</script>
+
+</body>
+</html>

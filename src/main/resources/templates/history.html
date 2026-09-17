@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Analysis History')}"></head>
+<body>
+
+<header th:replace="~{layout :: navbar('history')}"></header>
+
+<main class="container">
+
+    <section class="hero">
+        <h1>Analysis History</h1>
+        <p class="subtitle">
+            Every analysis is persisted. This page reads the
+            <span class="mono">analysis_records</span> table directly — useful for
+            demonstrating that results really are saved.
+        </p>
+    </section>
+
+    <div th:replace="~{layout :: aistatus(${aiStatus})}"></div>
+
+    <section class="card">
+        <p class="empty" th:if="${#lists.isEmpty(records)}">
+            No analyses yet. <a th:href="@{/}">Upload a file</a> to get started.
+        </p>
+
+        <table class="history-table" th:if="${not #lists.isEmpty(records)}">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>File</th>
+                <th>When</th>
+                <th>Findings</th>
+                <th>Risk</th>
+                <th>AI Status</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${records}">
+                <td class="mono" th:text="${r.id}">1</td>
+                <td class="mono" th:text="${r.fileName}">File.java</td>
+                <td th:text="${#temporals.format(r.analysedAt, 'dd MMM HH:mm')}">date</td>
+                <td>
+                    <span th:text="${r.totalFindings}">0</span>
+                    <span class="mini sev-critical" th:if="${r.criticalCount > 0}"
+                          th:text="${r.criticalCount} + ' critical'"></span>
+                </td>
+                <td>
+                    <span class="risk-pill" th:text="${r.riskScore}">0</span>
+                </td>
+                <td>
+                    <span class="src-tag" th:classappend="${r.degraded} ? 'status-degraded' : 'status-online'"
+                          th:text="${r.aiEngineStatus}">SUCCESS</span>
+                </td>
+                <td><a class="link" th:href="@{'/results/' + ${r.id}}">View report</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

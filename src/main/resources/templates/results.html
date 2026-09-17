@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Analysis Results')}"></head>
+<body>
+
+<header th:replace="~{layout :: navbar('home')}"></header>
+
+<main class="container">
+
+    <section class="results-header">
+        <div>
+            <h1>Analysis Report</h1>
+            <p class="file-meta">
+                <span class="mono" th:text="${record.fileName}">File.java</span>
+                <span class="sep">&middot;</span>
+                <span th:text="${record.methodsAnalysed} + ' methods parsed'">0 methods</span>
+                <span class="sep">&middot;</span>
+                <span th:text="${#temporals.format(record.analysedAt, 'dd MMM yyyy, HH:mm')}">date</span>
+                <span class="sep">&middot;</span>
+                <span>Report #<span th:text="${record.id}">1</span></span>
+            </p>
+        </div>
+        <a th:href="@{/}" class="btn btn-secondary">Analyse another file</a>
+    </section>
+
+    <div th:replace="~{layout :: aistatus(${aiStatus})}"></div>
+
+    <!-- Explicit degraded-mode explanation -->
+    <div class="alert alert-warn" th:if="${record.degraded}">
+        <strong>Degraded mode.</strong>
+        The Python AI service was unreachable during this run, so no semantic
+        confidence scoring was applied. The findings below come from the static
+        rule engine, which runs entirely inside the JVM. Start the AI service and
+        re-upload the file to get AI-enriched results.
+    </div>
+
+    <!-- Summary -->
+    <section class="summary-grid">
+        <div class="summary-card score">
+            <div class="summary-value" th:text="${record.riskScore}">0</div>
+            <div class="summary-label">Risk Score <span class="muted">/ 100</span></div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value" th:text="${record.totalFindings}">0</div>
+            <div class="summary-label">Total Findings</div>
+        </div>
+        <div class="summary-card sev-critical">
+            <div class="summary-value" th:text="${record.criticalCount}">0</div>
+            <div class="summary-label">Critical</div>
+        </div>
+        <div class="summary-card sev-high">
+            <div class="summary-value" th:text="${record.highCount}">0</div>
+            <div class="summary-label">High</div>
+        </div>
+        <div class="summary-card sev-medium">
+            <div class="summary-value" th:text="${record.mediumCount}">0</div>
+            <div class="summary-label">Medium</div>
+        </div>
+        <div class="summary-card sev-low">
+            <div class="summary-value" th:text="${record.lowCount}">0</div>
+            <div class="summary-label">Low</div>
+        </div>
+    </section>
+
+    <!-- Clean file -->
+    <section class="card clean-card" th:if="${record.totalFindings == 0}">
+        <h2>No vulnerabilities detected</h2>
+        <p>
+            None of the active rules matched this file. That is not a proof of
+            safety — it means nothing in DevSentinel's current rule set applies.
+        </p>
+    </section>
+
+    <!-- Findings -->
+    <section class="findings" th:if="${record.totalFindings > 0}">
+        <h2 class="section-title">
+            Findings <span class="muted" th:text="'(' + ${record.totalFindings} + ')'"></span>
+        </h2>
+
+        <article class="finding" th:each="f : ${record.findings}"
+                 th:classappend="${f.severityCssClass}">
+
+            <div class="finding-head">
+                <div class="finding-title">
+                    <span class="badge" th:classappend="${f.severityCssClass}"
+                          th:text="${f.severity}">HIGH</span>
+                    <h3 th:text="${f.displayName}">Vulnerability</h3>
+                    <span class="type-code" th:text="${f.vulnerabilityType}">TYPE</span>
+                </div>
+                <div class="finding-confidence">
+                    <div class="conf-bar">
+                        <div class="conf-fill" th:style="'width:' + ${f.confidencePercent} + '%'"></div>
+                    </div>
+                    <span class="conf-text">
+                        <span th:text="${f.confidencePercent}">0</span>% confidence
+                    </span>
+                </div>
+            </div>
+
+            <div class="finding-meta">
+                <span class="meta-item" th:if="${f.owaspCategory}">
+                    <span class="meta-key">OWASP</span>
+                    <span th:text="${f.owaspCategory}">A03</span>
+                </span>
+                <span class="meta-item">
+                    <span class="meta-key">Category</span>
+                    <span th:text="${f.category}">SECURITY</span>
+                </span>
+                <span class="meta-item">
+                    <span class="meta-key">File</span>
+                    <span class="mono" th:text="${f.fileName}">File.java</span>
+                </span>
+                <span class="meta-item">
+                    <span class="meta-key">Line</span>
+                    <span class="mono" th:text="${f.lineNumber}">0</span>
+                </span>
+                <span class="meta-item">
+                    <span class="meta-key">Method</span>
+                    <span class="mono" th:text="${f.methodName}">method</span>
+                </span>
+                <span class="meta-item">
+                    <span class="meta-key">Source</span>
+                    <span class="src-tag" th:text="${f.detectionSource}">STATIC</span>
+                </span>
+            </div>
+
+            <div class="finding-body">
+                <h4>What is wrong</h4>
+                <!-- th:text escapes the content, so uploaded code can never
+                     inject markup into this page -->
+                <p th:text="${f.description}">Description</p>
+
+                <h4>Affected code</h4>
+                <pre class="code-block"><code th:text="${f.codeSnippet}">code</code></pre>
+
+                <div th:if="${f.remediation}">
+                    <h4>Suggested fix</h4>
+                    <pre class="code-block fix"><code th:text="${f.remediation}">fix</code></pre>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <p class="db-note">
+        This report is stored in the database as record
+        <span class="mono">#<span th:text="${record.id}">1</span></span>
+        and can be reopened at any time from the History page.
+    </p>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>
